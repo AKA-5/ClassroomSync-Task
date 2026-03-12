@@ -39,7 +39,7 @@
   },
 
   "oauth2": {
-    "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+    "client_id": "159933239373-51ukee28h85vfve882pm3404r0fbueb6.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/classroom.courses.readonly",
       "https://www.googleapis.com/auth/classroom.announcements.readonly",
