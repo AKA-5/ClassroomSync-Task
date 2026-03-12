@@ -24,4 +24,5 @@ Chrome Extension Manifest V3, Google Classroom API, Google Tasks API, JavaScript
 ## Author
 
 Muhammad Kaleem Akhtar
+
 GitHub: [github.com/AKA-5](https://github.com/AKA-5)
