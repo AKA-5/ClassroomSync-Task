@@ -172,14 +172,14 @@ function setUIState(state) {
   // â€” Progress: ONLY visible during an active sync operation
   if (!syncing) progressWrap.hidden = true;
 
-  // â€” Auth connection prompt
-  authPrompt.hidden = authed;
+  // – Auth connection prompt: only visible on first run, not on every re-auth
+  authPrompt.hidden = authed || !wasFirstRun;
 
-  // â€” Status card (always visible â€” shows last-sync context)
+  // – Status card (always visible — shows last-sync context)
   statusCard.hidden = false;
 
-  // â€” No-courses empty state
-  noCoursesMsg.hidden = (state !== 'empty');
+  // – No-courses empty state: hide if courses are already rendered
+  noCoursesMsg.hidden = (state !== 'empty') || courseList.children.length > 0;
 
   // â€” Courses section: cleared when unauthenticated or empty
   if (state === 'unauthenticated' || state === 'empty') {
