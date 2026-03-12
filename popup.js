@@ -5,8 +5,9 @@ import { getSettings, updateSettings } from './utils/storage.js';
 
 // ─── DOM refs ─────────────────────────────────────────────────────────────────
 const syncBtn       = document.getElementById('syncBtn');
-const syncIcon      = syncBtn.querySelector('.sync-btn__icon');
+const syncIcon      = syncBtn.querySelector('.sync-icon-svg');
 const syncLabel     = syncBtn.querySelector('.sync-btn__label');
+const rippleContainer = syncBtn.querySelector('.ripple-container');
 const darkToggle    = document.getElementById('darkModeToggle');
 const optionsBtn    = document.getElementById('optionsBtn');
 
@@ -45,8 +46,9 @@ function relativeTime(ts) {
 
 function applyTheme(dark) {
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  darkToggle.textContent = dark ? '☀️' : '🌙';
-  darkToggle.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+  const label = dark ? 'Switch to light mode' : 'Switch to dark mode';
+  darkToggle.setAttribute('aria-label', label);
+  darkToggle.title = label;
 }
 
 // ─── Render helpers ───────────────────────────────────────────────────────────
@@ -67,16 +69,26 @@ function renderStatus({ lastSyncTime, lastSyncCount, lastSyncError }) {
   }
 }
 
-function renderCourses(courses) {
+function renderCourses(courses, enabledCourses) {
   if (!courses || courses.length === 0) return;
+  const enabledCount = enabledCourses
+    ? courses.filter(c => enabledCourses.includes(c.id)).length
+    : courses.length;
   coursesHead.hidden = false;
-  coursesBadge.textContent = courses.length;
+  coursesBadge.textContent = enabledCount;
+  coursesBadge.setAttribute('aria-label', `${enabledCount} course${enabledCount !== 1 ? 's' : ''}`);
   courseList.innerHTML = courses
-    .map(c => `
-      <li class="course-item">
-        <span class="course-item__icon" aria-hidden="true">📖</span>
+    .map(c => {
+      const active = !enabledCourses || enabledCourses.includes(c.id);
+      return `
+      <li class="course-item${active ? '' : ' course-item--disabled'}" aria-label="${escapeHtml(c.name)}${active ? '' : ' (disabled)'}">        <svg class="course-item__icon" width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true" focusable="false">
+          <rect x="1.5" y="1.5" width="5.5" height="12" rx="1" fill="currentColor" opacity="0.85"/>
+          <rect x="7" y="1.5" width="6.5" height="12" rx="1" fill="currentColor" opacity="0.45"/>
+          <path d="M7 1.5v12" stroke="white" stroke-width="0.75"/>
+        </svg>
         <span class="course-item__name" title="${escapeHtml(c.name)}">${escapeHtml(c.name)}</span>
-      </li>`)
+      </li>`;
+    })
     .join('');
 }
 
@@ -114,6 +126,7 @@ function doSync() {
   syncBtn.disabled = true;
   syncIcon.classList.add('spinning');
   syncLabel.textContent = 'Syncing…';
+  syncBtn.setAttribute('aria-label', 'Syncing in progress…');
   errorMsgEl.hidden = true;
   startProgress();
 
@@ -125,9 +138,10 @@ function doSync() {
     syncBtn.disabled = false;
     syncIcon.classList.remove('spinning');
     syncLabel.textContent = 'Sync Now';
+    syncBtn.setAttribute('aria-label', 'Sync Google Classroom now');
 
     if (runtimeErr || !response) {
-      errorMsgEl.textContent = '⚠️ Background service unreachable — try reloading the extension.';
+      errorMsgEl.textContent = 'Background service unreachable — try reloading the extension.';
       errorMsgEl.hidden = false;
       return;
     }
@@ -138,15 +152,15 @@ function doSync() {
       taskCountEl.textContent = response.result.tasksCreated;
 
       if (response.result.errors?.length) {
-        errorMsgEl.textContent = `⚠️ ${response.result.errors[0]}`;
+        errorMsgEl.textContent = response.result.errors[0];
         errorMsgEl.hidden = false;
       }
 
       // Refresh courses panel from freshly-cached data
       const settings = await getSettings();
-      renderCourses(settings.cachedCourses);
+      renderCourses(settings.cachedCourses, settings.enabledCourses);
     } else {
-      errorMsgEl.textContent = `⚠️ ${response.error || 'Sync failed. Check your Google account connection.'}`;
+      errorMsgEl.textContent = response.error || 'Sync failed. Check your Google account connection.';
       errorMsgEl.hidden = false;
     }
   });
@@ -158,12 +172,24 @@ async function init() {
   const settings = await getSettings();
   applyTheme(settings.darkMode);
   renderStatus(settings);
-  renderCourses(settings.cachedCourses);
+  renderCourses(settings.cachedCourses, settings.enabledCourses);
 }
 
 // ─── Events ───────────────────────────────────────────────────────────────────
 
-syncBtn.addEventListener('click', doSync);
+function triggerRipple(e) {
+  const rect   = syncBtn.getBoundingClientRect();
+  const size   = Math.max(rect.width, rect.height);
+  const x      = e.clientX - rect.left - size / 2;
+  const y      = e.clientY - rect.top  - size / 2;
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  ripple.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
+  rippleContainer.appendChild(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+}
+
+syncBtn.addEventListener('click', (e) => { triggerRipple(e); doSync(); });
 
 darkToggle.addEventListener('click', async () => {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';

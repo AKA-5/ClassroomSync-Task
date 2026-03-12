@@ -3,7 +3,7 @@
 // Used by both background.js (alarm-based) and popup.js (manual trigger).
 
 import { getAuthToken, listCourses, listAnnouncements, getOrCreateTaskList, createTask } from './api.js';
-import { isTaskRelated, extractDueDate, buildTaskTitle, announcementKey } from './parser.js';
+import { isTaskRelated, extractDueDate, buildTaskTitle, announcementKey, detectPriority } from './parser.js';
 import { getSettings, updateSettings, isCourseEnabled, isAlreadySynced, markAsSynced } from './storage.js';
 
 /**
@@ -72,9 +72,16 @@ export async function runSync({ interactive = false } = {}) {
       const dueDate = extractDueDate(text);
       const link    = ann.alternateLink || '';
 
-      // Truncate notes to stay under Tasks API limits (~max 8192 chars for notes)
-      const snippet = text.length > 800 ? `${text.substring(0, 800)}…` : text;
-      const notes   = `${snippet}\n\n🔗 ${link}`.trim();
+      // Build priority-aware notes
+      const kwObj   = settings.priorityKeywords || {};
+      const kwMap   = {
+        high:   kwObj.high   ? kwObj.high.split(',').map(s => s.trim()).filter(Boolean)   : undefined,
+        medium: kwObj.medium ? kwObj.medium.split(',').map(s => s.trim()).filter(Boolean) : undefined,
+        low:    kwObj.low    ? kwObj.low.split(',').map(s => s.trim()).filter(Boolean)    : undefined,
+      };
+      const priority = detectPriority(text, (kwMap.high || kwMap.medium || kwMap.low) ? kwMap : undefined);
+      const snippet  = text.length > 800 ? `${text.substring(0, 800)}…` : text;
+      const notes    = `Priority: ${priority.charAt(0).toUpperCase() + priority.slice(1)}\n\n${snippet}\n\n${link}`.trim();
 
       try {
         await createTask(token, taskListId, { title, notes, dueDate });

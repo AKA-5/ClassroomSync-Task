@@ -17,6 +17,10 @@ const statCourseCount = document.getElementById('statCourseCount');
 const signOutBtn      = document.getElementById('signOutBtn');
 const saveStatusEl    = document.getElementById('saveStatus');
 
+const kwHighInput     = document.getElementById('kwHigh');
+const kwMediumInput   = document.getElementById('kwMedium');
+const kwLowInput      = document.getElementById('kwLow');
+
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
 function applyTheme(dark) {
@@ -60,10 +64,13 @@ function renderCourseFilters(courses, enabledCourses) {
 }
 
 async function saveCourseFilters() {
-  const checkboxes = [...courseFiltersEl.querySelectorAll('.course-cb')];
-  const allEnabled = checkboxes.every(cb => cb.checked);
-  const enabled    = allEnabled ? null : checkboxes.filter(cb => cb.checked).map(cb => cb.dataset.id);
-  await updateSettings({ enabledCourses: enabled });
+  const checkboxes    = [...courseFiltersEl.querySelectorAll('.course-cb')];
+  const checkedIds    = checkboxes.filter(cb => cb.checked).map(cb => cb.dataset.id);
+  const allEnabled    = checkedIds.length === checkboxes.length;
+  const toStore       = allEnabled ? null : checkedIds;
+  await updateSettings({ enabledCourses: toStore });
+  // Keep the stat counter in sync with the current filter
+  statCourseCount.textContent = checkedIds.length;
   flashSaved();
 }
 
@@ -95,9 +102,16 @@ async function init() {
   // Stats
   statLastSync.textContent    = s.lastSyncTime    ? new Date(s.lastSyncTime).toLocaleString() : '—';
   statTaskCount.textContent   = s.lastSyncCount   != null ? s.lastSyncCount : '—';
-  statCourseCount.textContent = s.cachedCourses?.length  ?? '—';
+  const enabledCount          = s.enabledCourses  ? s.enabledCourses.length : (s.cachedCourses?.length ?? 0);
+  statCourseCount.textContent = s.cachedCourses?.length ? enabledCount : '—';
 
   renderCourseFilters(s.cachedCourses || [], s.enabledCourses);
+
+  // Priority keywords
+  const kw = s.priorityKeywords || {};
+  if (kwHighInput)   kwHighInput.value   = kw.high   || '';
+  if (kwMediumInput) kwMediumInput.value = kw.medium || '';
+  if (kwLowInput)    kwLowInput.value    = kw.low    || '';
 }
 
 // ─── Events ───────────────────────────────────────────────────────────────────
@@ -105,6 +119,21 @@ async function init() {
 autoSyncToggle.addEventListener('change', saveGeneral);
 darkModeToggle.addEventListener('change', saveGeneral);
 taskListInput.addEventListener('change', saveGeneral);
+
+async function savePriorityKeywords() {
+  await updateSettings({
+    priorityKeywords: {
+      high:   kwHighInput?.value.trim()   || '',
+      medium: kwMediumInput?.value.trim() || '',
+      low:    kwLowInput?.value.trim()    || '',
+    },
+  });
+  flashSaved();
+}
+
+if (kwHighInput)   kwHighInput.addEventListener('change', savePriorityKeywords);
+if (kwMediumInput) kwMediumInput.addEventListener('change', savePriorityKeywords);
+if (kwLowInput)    kwLowInput.addEventListener('change', savePriorityKeywords);
 
 signOutBtn.addEventListener('click', async () => {
   const confirmed = window.confirm(

@@ -98,17 +98,40 @@ Background alarm (every 30 min)
 - `createTask(token, listId, {title, notes, dueDate})` — RFC 3339 due date
 
 ### `utils/parser.js`
-- `isTaskRelated(text)` — keyword regex (quiz, test, exam, assignment…)
-- `extractDueDate(text)` — handles: today/tomorrow/weekdays/in N days/Month DD/MM-DD
+- `isTaskRelated(text)` — keyword regex (quiz, test, exam, midterm, final…)
+- `extractDueDates(text)` — returns `DateResult[]` with confidence scores; handles: today/tonight, tomorrow, EOD/COB, end-of-week, in N days, N weeks from today, end/start of month, next/this weekday, Month DD, MM/DD(/YY)
+- `extractDueDate(text)` — returns best-confidence Date (confidence ≥ 60) or null; skips holidays
+- `detectPriority(text, customKeywords?)` — returns `'high'|'medium'|'low'`; uses keyword matching and upcoming-deadline proximity
 - `buildTaskTitle(text, courseName)` — `[Course] Keyword fragment…` format
 - `announcementKey(courseId, annId)` — stable dedup key
 
 ### `utils/storage.js`
 - `getSettings()` / `updateSettings()` — `chrome.storage.sync` with defaults
 - `isAlreadySynced(key)` / `markAsSynced(key)` — `chrome.storage.local`, pruned at 90 days
+- Defaults now include `priorityKeywords: { high, medium, low }` — comma-separated keyword strings synced across devices
 
 ### `utils/sync.js`
 - Single exported `runSync({ interactive })` function consumed by background and popup
+- Reads `priorityKeywords` from settings and passes a parsed map to `detectPriority`
+- Prepends `Priority: High/Medium/Low` to task notes
+
+---
+
+## UI Architecture
+
+### Popup (`popup.html/js/css`)
+- Warm earthy color palette — terracotta primary (`#B5541E`), sage green secondary (`#4E6845`), warm cream background
+- All emoji icons replaced with inline SVG (book logo, moon/sun toggle, gear settings, sync arrows, course book)
+- Dark/light theme toggled via `[data-theme]` attribute on `<html>`; moon/sun icons controlled via CSS, no JS `textContent` swap
+- Micro-interactions: popup fade-in (`popupFadeIn` keyframe), button hover scale 1.02, ripple effect on Sync Now (JS-injected `.ripple` span)
+- WCAG 2.1 AA compliant: all interactive elements have `aria-label`; error messages use `role="alert"`; skip link to `#mainContent`; focus rings use `--accent` color
+- `@media (prefers-reduced-motion)` disables all animations
+
+### Options (`options.html/js/css`)
+- Matches popup color tokens exactly
+- Added **Priority Keywords** section: three labeled text inputs (High/Medium/Low) with color-coded dots
+- Section headings have `aria-labelledby` for screen reader landmark navigation
+- `statCourseCount` is updated live when course filter checkboxes change
 
 ---
 
@@ -148,4 +171,5 @@ https://www.googleapis.com/auth/tasks
 
 | Version | Date | Notes |
 |---|---|---|
-| 1.0.0 | 2026-03-12 | Initial build — full sync pipeline, popup, options page |
+| 1.1.0 | 2026-03-12 | Warm color palette; SVG icons; micro-interactions; priority detection; enhanced date parser; WCAG 2.1 AA; course filter count fix; AGPL-3.0 |
+| 1.0.0 | 2026-03-01 | Initial build — full sync pipeline, popup, options page |

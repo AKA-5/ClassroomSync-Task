@@ -10,15 +10,23 @@
   <div class="page" id="page">
 
     <header class="page-header">
-      <h1>⚙️ Settings</h1>
-      <p class="page-subtitle">ClassroomSync Tasks</p>
+      <div class="page-header-icon" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" focusable="false">
+          <path d="M11 2.5h6l.78 2.42c.66.27 1.28.63 1.84 1.08l2.42-.8 3 4.33-1.86 1.61c.08.58.12 1.14.12 1.66 0 .52-.04 1.08-.12 1.66l1.86 1.61-3 4.33-2.42-.8c-.56.45-1.18.81-1.84 1.08l-.78 2.42h-6l-.78-2.42a7.3 7.3 0 0 1-1.84-1.08l-2.42.8-3-4.33 1.86-1.61A7.7 7.7 0 0 1 4.7 12.9c0-.52.04-1.08.12-1.66L3 9.63l3-4.33 2.42.8A7.3 7.3 0 0 1 10.22 5L11 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="14" cy="13" r="3.5" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div>
+        <h1 id="page-title">Settings</h1>
+        <p class="page-subtitle">ClassroomSync Tasks</p>
+      </div>
     </header>
 
     <main class="page-body">
 
       <!-- ── General ──────────────────────────────────────────────────── -->
-      <section class="section">
-        <h2 class="section-title">General</h2>
+      <section class="section" aria-labelledby="section-general">
+        <h2 class="section-title" id="section-general">General</h2>
 
         <div class="setting-row">
           <div class="setting-info">
@@ -52,17 +60,47 @@
       </section>
 
       <!-- ── Course Filters ───────────────────────────────────────────── -->
-      <section class="section">
-        <h2 class="section-title">Course Filters</h2>
+      <section class="section" aria-labelledby="section-courses">
+        <h2 class="section-title" id="section-courses">Course Filters</h2>
         <p class="section-desc">Choose which courses to include in syncs. Run a sync from the popup first to discover your courses.</p>
         <div class="course-filters" id="courseFilters">
           <p class="placeholder-text">No courses found yet — click <strong>Sync Now</strong> in the popup.</p>
         </div>
       </section>
 
+      <!-- ── Priority Keywords ───────────────────────────────────────── -->
+      <section class="section" aria-labelledby="section-priority">
+        <h2 class="section-title" id="section-priority">Priority Keywords</h2>
+        <p class="section-desc">Customize which words map to each priority level. Comma-separated. Applied when new tasks are created in Google Tasks.</p>
+
+        <div class="priority-row">
+          <div class="priority-label">
+            <span class="priority-dot priority-dot--high" aria-hidden="true"></span>
+            <label for="kwHigh">High Priority</label>
+          </div>
+          <input type="text" id="kwHigh" class="text-input" placeholder="exam, final, midterm, deadline" autocomplete="off">
+        </div>
+
+        <div class="priority-row">
+          <div class="priority-label">
+            <span class="priority-dot priority-dot--medium" aria-hidden="true"></span>
+            <label for="kwMedium">Medium Priority</label>
+          </div>
+          <input type="text" id="kwMedium" class="text-input" placeholder="quiz, assignment, homework, project" autocomplete="off">
+        </div>
+
+        <div class="priority-row">
+          <div class="priority-label">
+            <span class="priority-dot priority-dot--low" aria-hidden="true"></span>
+            <label for="kwLow">Low Priority</label>
+          </div>
+          <input type="text" id="kwLow" class="text-input" placeholder="reading, optional, suggested" autocomplete="off">
+        </div>
+      </section>
+
       <!-- ── Stats ────────────────────────────────────────────────────── -->
-      <section class="section">
-        <h2 class="section-title">Sync Stats</h2>
+      <section class="section" aria-labelledby="section-stats">
+        <h2 class="section-title" id="section-stats">Sync Stats</h2>
         <div class="stats-grid">
           <div class="stat-card">
             <span class="stat-value" id="statLastSync">—</span>
@@ -80,8 +118,8 @@
       </section>
 
       <!-- ── Account ──────────────────────────────────────────────────── -->
-      <section class="section">
-        <h2 class="section-title">Account</h2>
+      <section class="section" aria-labelledby="section-account">
+        <h2 class="section-title" id="section-account">Account</h2>
         <button class="btn btn-danger" id="signOutBtn" type="button">Sign Out &amp; Clear Data</button>
         <p class="setting-desc" style="margin-top: 8px;">
           Removes the cached auth token and local sync history.

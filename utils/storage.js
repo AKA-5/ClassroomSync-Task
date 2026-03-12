@@ -14,6 +14,11 @@ export const DEFAULTS = {
   lastSyncTime:   null,   // Unix ms timestamp
   lastSyncCount:  0,      // tasks created on last sync
   lastSyncError:  null,   // error string or null
+  priorityKeywords: {
+    high:   'exam, final, midterm, deadline, due tomorrow, urgent',
+    medium: 'quiz, assignment, homework, hw, project, essay, report',
+    low:    'reading, optional, suggested, chapter, lecture',
+  },
 };
 
 // ─── Settings ─────────────────────────────────────────────────────────────────
