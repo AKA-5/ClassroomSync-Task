@@ -8,6 +8,8 @@
 </head>
 <body>
   <a class="skip-link" href="#mainContent">Skip to main content</a>
+  <!-- Toast notification — fixed overlay, shown briefly after key events -->
+  <div id="toast" class="toast" hidden role="status" aria-live="assertive"></div>
   <div class="layout">
 
     <!-- ── Header ─────────────────────────────────────────────────────── -->
@@ -43,6 +45,12 @@
     <!-- ── Main ───────────────────────────────────────────────────────── -->
     <main class="content" id="mainContent">
 
+      <!-- Auth connection prompt (visible only when not signed in) -->
+      <div id="authPrompt" class="auth-prompt" hidden role="region" aria-label="Connect your account">
+        <span class="auth-prompt__icon" aria-hidden="true">🔌</span>
+        <p class="auth-prompt__text">Connect your Google Account to start syncing Classroom to Tasks</p>
+      </div>
+
       <!-- Status card -->
       <div class="card" id="statusCard" role="region" aria-label="Sync status">
         <div class="status-row">
@@ -75,7 +83,19 @@
         <div class="progress-bar">
           <div class="progress-fill" id="progressFill" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Sync progress"></div>
         </div>
-        <p class="progress-text" id="progressText" aria-live="polite">Connecting…</p>
+        <p class="progress-text" id="progressText" aria-live="polite">
+          <span class="progress-spinner" aria-hidden="true"></span>
+          <span id="progressTextContent">Connecting…</span>
+        </p>
+      </div>
+
+      <!-- No-courses empty state (shown when authenticated but no courses discovered) -->
+      <div id="noCoursesMsg" class="empty-state" hidden role="region" aria-label="No courses found">
+        <span class="empty-state__icon" aria-hidden="true">📚</span>
+        <p class="empty-state__text">No courses found in Google Classroom</p>
+        <a href="https://classroom.google.com" target="_blank" rel="noopener noreferrer" class="empty-state__link">
+          Open Google Classroom ↗
+        </a>
       </div>
 
       <!-- Courses list -->

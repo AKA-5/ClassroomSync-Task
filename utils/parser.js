@@ -6,12 +6,17 @@
 
 const TASK_KEYWORDS_RE = /\b(quiz|test|exam|assignment|homework|hw|project|essay|report|presentation|lab|reading|chapter|problem\s+set|pset|submit|turn\s+in|due|deadline|complete|finish|midterm|final)\b/i;
 
+// Detects date-prefixed task phrasing even when no explicit task keyword is present.
+// e.g. "Submit by Friday", "Reading for 3/25", "ends on March 20"
+const STRONG_DATE_INDICATORS_RE = /\b(submit\s+by|turn\s+in\s+by|by\s+(?:tomorrow|today|tonight|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next|this|\d)|due\s*:|ends?\s+(?:on\s+)?(?:\d{1,2}\/|\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)|today|tomorrow)|for\s+\d{1,2}\/\d{1,2})\b/i;
+
 /**
- * Returns true if the announcement text contains any task-related keywords.
+ * Returns true if the announcement text contains task-related keywords OR
+ * strong date-action phrases (e.g. "submit by Friday", "ends 04/20").
  * @param {string} text
  */
 export function isTaskRelated(text) {
-  return TASK_KEYWORDS_RE.test(text);
+  return TASK_KEYWORDS_RE.test(text) || STRONG_DATE_INDICATORS_RE.test(text);
 }
 
 // ─── Date Parsing ─────────────────────────────────────────────────────────────
@@ -237,7 +242,37 @@ export function detectPriority(text, customKeywords) {
 // ─── Title Building ───────────────────────────────────────────────────────────
 
 /**
+ * Strips date, time, and weekday phrases from a title fragment.
+ * Produces cleaner task titles like "Quiz on chapters 3-4" instead of
+ * "Quiz next Tuesday on chapters 3-4".
+ */
+function stripDatePhrases(s) {
+  return s
+    // "next/this weekday"
+    .replace(/\bnext\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)\b/gi, '')
+    .replace(/\bthis\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)\b/gi, '')
+    // standalone weekday names
+    .replace(/\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/gi, '')
+    // today / tomorrow / tonight
+    .replace(/\b(today|tonight|tomorrow)\b/gi, '')
+    // "Month DDth[, YYYY]"
+    .replace(/\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s*\d{4})?\b/gi, '')
+    // MM/DD[/YYYY]
+    .replace(/\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\b/g, '')
+    // time e.g. "at 5pm", "by 11:59am"
+    .replace(/\bat\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/gi, '')
+    // trailing prepositions left after date removal
+    .replace(/\b(by|for|on|at|before|until)\s*$/i, '')
+    // clean up loose punctuation and extra whitespace
+    .replace(/\s*[-–—,;:]\s*/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * Builds a human-readable task title from announcement text and course name.
+ * Date/time phrases are stripped from the extracted fragment for clean titles.
+ * e.g. "Quiz next Tuesday on chapters 3-4" → "[Math] Quiz on chapters 3-4"
  * @param {string} text  - Raw announcement text
  * @param {string} courseName
  * @returns {string}
@@ -249,13 +284,18 @@ export function buildTaskTitle(text, courseName) {
   const kwMatch = clean.match(/\b(quiz|test|exam|assignment|homework|project|essay|report|reading|lab|chapter|problem\s+set)\b[^.!?\n]{0,70}/i);
   if (kwMatch) {
     const fragment = kwMatch[0].trim().replace(/[,;:]$/, '');
-    return `[${courseName}] ${capitalise(fragment)}`.substring(0, 100);
+    const stripped = stripDatePhrases(fragment);
+    // Use stripped version only if it remains meaningful (> 4 chars)
+    const titleFrag = stripped.length > 4 ? stripped : fragment;
+    return `[${courseName}] ${capitalise(titleFrag)}`.substring(0, 100);
   }
 
-  // Fall back to first sentence / line
+  // Fall back to first sentence / line, stripping date noise
   const firstLine = clean.split(/[.!\n]/)[0].trim();
-  const snippet = firstLine.length > 70 ? `${firstLine.substring(0, 67)}…` : firstLine;
-  return `[${courseName}] ${snippet}`.substring(0, 100);
+  const stripped  = stripDatePhrases(firstLine);
+  const snippet   = stripped.length > 4 ? stripped : firstLine;
+  const truncated = snippet.length > 70 ? `${snippet.substring(0, 67)}…` : snippet;
+  return `[${courseName}] ${truncated}`.substring(0, 100);
 }
 
 function capitalise(s) {

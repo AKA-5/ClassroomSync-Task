@@ -19,7 +19,19 @@ export function getAuthToken(interactive = false) {
   return new Promise((resolve, reject) => {
     chrome.identity.getAuthToken({ interactive }, (token) => {
       if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
+        const raw = chrome.runtime.lastError.message || '';
+        // Normalize Chrome identity error strings so popup.js ERROR_MAP can match them
+        let normalized;
+        if (/not approved|did not approve|user cancel|cancelled the/i.test(raw)) {
+          normalized = `cancelled: ${raw}`;
+        } else if (/not granted|revoked|invalid credentials|invalid_client/i.test(raw)) {
+          normalized = `AUTH_EXPIRED: ${raw}`;
+        } else if (/could not be loaded|authorization page/i.test(raw)) {
+          normalized = `network: ${raw}`;
+        } else {
+          normalized = raw;
+        }
+        reject(new Error(normalized));
       } else {
         resolve(token);
       }

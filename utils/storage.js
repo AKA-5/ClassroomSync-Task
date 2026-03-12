@@ -69,3 +69,21 @@ export async function markAsSynced(key) {
 
   await chrome.storage.local.set({ [SYNCED_KEY]: map });
 }
+
+// ─── First-Run Detection ──────────────────────────────────────────────────────
+
+const FIRST_RUN_KEY = 'firstRunComplete';
+
+/**
+ * Returns true if the user has never completed a sync (i.e. first time opening).
+ * Stored in chrome.storage.local (per-device, not synced across browsers).
+ */
+export async function isFirstRun() {
+  const { [FIRST_RUN_KEY]: done } = await chrome.storage.local.get(FIRST_RUN_KEY);
+  return !done;
+}
+
+/** Call after the first successful sync to prevent the welcome flow showing again. */
+export async function markFirstRunDone() {
+  await chrome.storage.local.set({ [FIRST_RUN_KEY]: true });
+}
