@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClassroomSync Tasks — Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="page" id="page">
+
+    <header class="page-header">
+      <h1>⚙️ Settings</h1>
+      <p class="page-subtitle">ClassroomSync Tasks</p>
+    </header>
+
+    <main class="page-body">
+
+      <!-- ── General ──────────────────────────────────────────────────── -->
+      <section class="section">
+        <h2 class="section-title">General</h2>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label class="setting-label" for="autoSyncToggle">Auto-sync every 30 minutes</label>
+            <p class="setting-desc">Check for new announcements in the background</p>
+          </div>
+          <label class="toggle" aria-label="Enable auto-sync">
+            <input type="checkbox" id="autoSyncToggle">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label class="setting-label" for="darkModeToggle">Dark mode</label>
+            <p class="setting-desc">Apply dark theme to popup and options</p>
+          </div>
+          <label class="toggle" aria-label="Enable dark mode">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="setting-row setting-row--col">
+          <div class="setting-info">
+            <label class="setting-label" for="taskListName">Task list name</label>
+            <p class="setting-desc">Google Tasks list where new tasks are created</p>
+          </div>
+          <input type="text" id="taskListName" class="text-input" placeholder="Classroom Tasks" maxlength="50">
+        </div>
+      </section>
+
+      <!-- ── Course Filters ───────────────────────────────────────────── -->
+      <section class="section">
+        <h2 class="section-title">Course Filters</h2>
+        <p class="section-desc">Choose which courses to include in syncs. Run a sync from the popup first to discover your courses.</p>
+        <div class="course-filters" id="courseFilters">
+          <p class="placeholder-text">No courses found yet — click <strong>Sync Now</strong> in the popup.</p>
+        </div>
+      </section>
+
+      <!-- ── Stats ────────────────────────────────────────────────────── -->
+      <section class="section">
+        <h2 class="section-title">Sync Stats</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-value" id="statLastSync">—</span>
+            <span class="stat-label">Last sync</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statTaskCount">—</span>
+            <span class="stat-label">Tasks (last run)</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statCourseCount">—</span>
+            <span class="stat-label">Courses tracked</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Account ──────────────────────────────────────────────────── -->
+      <section class="section">
+        <h2 class="section-title">Account</h2>
+        <button class="btn btn-danger" id="signOutBtn" type="button">Sign Out &amp; Clear Data</button>
+        <p class="setting-desc" style="margin-top: 8px;">
+          Removes the cached auth token and local sync history.
+          Tasks already created in Google Tasks are <strong>not</strong> deleted.
+        </p>
+      </section>
+
+    </main>
+
+    <footer class="page-footer">
+      <a href="https://github.com/your-username/ClassroomSync-Tasks" target="_blank" rel="noopener noreferrer">GitHub</a>
+      &nbsp;·&nbsp; ClassroomSync Tasks v1.0
+      &nbsp;·&nbsp; <span id="saveStatus" class="save-status" aria-live="polite"></span>
+    </footer>
+
+  </div>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

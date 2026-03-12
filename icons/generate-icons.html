@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!--
+  ClassroomSync Tasks - Icon Generator
+  Open this file in a browser, then right-click each canvas to save as PNG.
+  Save them as: icon16.png, icon48.png, icon128.png inside the icons/ folder.
+  Alternatively, run: node generate-icons.js  (requires: npm install canvas)
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generate Icons</title>
+  <style>
+    body { font-family: sans-serif; padding: 24px; background: #f0f0f0; }
+    h1   { margin-bottom: 16px; }
+    .row { display: flex; gap: 24px; align-items: flex-end; flex-wrap: wrap; }
+    .item { text-align: center; }
+    canvas { display: block; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.2); margin-bottom: 8px; }
+    p { font-size: 12px; color: #555; }
+    button { margin-top: 6px; padding: 6px 12px; cursor: pointer; background: #4f46e5; color: white; border: none; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>ClassroomSync Tasks — Icon Generator</h1>
+  <p>Canvases drawn below. Click each button to download, then place the PNG files in the <code>icons/</code> folder.</p>
+  <div class="row" id="row"></div>
+
+  <script>
+    const SIZES = [16, 48, 128];
+
+    function drawIcon(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width  = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const s   = size;
+
+      // Background gradient
+      const grad = ctx.createLinearGradient(0, 0, s, s);
+      grad.addColorStop(0, '#4f46e5');
+      grad.addColorStop(1, '#7c3aed');
+      ctx.fillStyle = grad;
+      roundRect(ctx, 0, 0, s, s, s * 0.17);
+      ctx.fill();
+
+      if (size >= 48) {
+        // Book
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(s*.22, s*.20, s*.52, s*.60);
+
+        // Text lines on book
+        ctx.fillStyle = '#4f46e5';
+        ctx.globalAlpha = 0.9;
+        ctx.fillRect(s*.31, s*.31, s*.34, s*.07);
+        ctx.globalAlpha = 0.65;
+        ctx.fillRect(s*.31, s*.42, s*.34, s*.05);
+        ctx.fillRect(s*.31, s*.51, s*.24, s*.05);
+        ctx.globalAlpha = 1;
+
+        // Green check circle
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        ctx.arc(s*.70, s*.70, s*.20, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth   = s * 0.055;
+        ctx.lineCap     = 'round';
+        ctx.lineJoin    = 'round';
+        ctx.beginPath();
+        ctx.moveTo(s*.61, s*.70);
+        ctx.lineTo(s*.68, s*.78);
+        ctx.lineTo(s*.80, s*.63);
+        ctx.stroke();
+      } else {
+        // 16px: simplified — just white book silhouette
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(3, 2, 8, 11);
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        ctx.arc(12, 12, 4, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      return canvas;
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.lineTo(x+w-r, y);
+      ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+      ctx.lineTo(x+w, y+h-r);
+      ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+      ctx.lineTo(x+r, y+h);
+      ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+      ctx.lineTo(x, y+r);
+      ctx.quadraticCurveTo(x, y, x+r, y);
+      ctx.closePath();
+    }
+
+    const row = document.getElementById('row');
+
+    SIZES.forEach(size => {
+      const canvas = drawIcon(size);
+      const item   = document.createElement('div');
+      item.className = 'item';
+
+      const label = document.createElement('p');
+      label.textContent = `${size}×${size}`;
+
+      const btn = document.createElement('button');
+      btn.textContent = `⬇ icon${size}.png`;
+      btn.onclick = () => {
+        const a    = document.createElement('a');
+        a.href     = canvas.toDataURL('image/png');
+        a.download = `icon${size}.png`;
+        a.click();
+      };
+
+      item.append(canvas, label, btn);
+      row.appendChild(item);
+    });
+  </script>
+</body>
+</html>

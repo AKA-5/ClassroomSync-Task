@@ -1,0 +1,209 @@
+/* ClassroomSync Tasks — Options Page Styles
+   Shares the same token names as popup.css for consistent theming. */
+
+/* ── Tokens ────────────────────────────────────────────────────────────────── */
+:root {
+  --bg:          #f9fafb;
+  --bg-page:     #ffffff;
+  --bg-card:     #f3f4f6;
+  --bg-hover:    #e5e7eb;
+  --text:        #111827;
+  --text-sub:    #6b7280;
+  --border:      #e5e7eb;
+  --accent:      #4f46e5;
+  --accent-dark: #4338ca;
+  --accent-fg:   #ffffff;
+  --danger:      #dc2626;
+  --danger-bg:   #fef2f2;
+  --danger-bord: #fecaca;
+  --radius:      10px;
+}
+
+[data-theme="dark"] {
+  --bg:          #0f172a;
+  --bg-page:     #0f172a;
+  --bg-card:     #1e293b;
+  --bg-hover:    #334155;
+  --text:        #f1f5f9;
+  --text-sub:    #94a3b8;
+  --border:      #334155;
+  --accent:      #6366f1;
+  --accent-dark: #4f46e5;
+  --danger-bg:   #450a0a;
+  --danger-bord: #991b1b;
+}
+
+/* ── Reset ─────────────────────────────────────────────────────────────────── */
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Base ──────────────────────────────────────────────────────────────────── */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+  transition: background .2s, color .2s;
+  line-height: 1.5;
+}
+
+/* ── Page wrapper ──────────────────────────────────────────────────────────── */
+.page {
+  max-width: 640px;
+  margin: 32px auto 64px;
+  background: var(--bg-page);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 24px rgba(0,0,0,.07);
+}
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+.page-header {
+  padding: 32px 36px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.page-header h1       { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.page-subtitle        { font-size: 13px; color: var(--text-sub); margin-top: 2px; }
+
+/* ── Body ──────────────────────────────────────────────────────────────────── */
+.page-body { padding: 24px 36px; display: flex; flex-direction: column; gap: 32px; }
+
+/* ── Section ───────────────────────────────────────────────────────────────── */
+.section { display: flex; flex-direction: column; gap: 14px; }
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text-sub);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.section-desc { font-size: 13px; color: var(--text-sub); }
+
+/* ── Setting row ───────────────────────────────────────────────────────────── */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 0;
+}
+.setting-row--col { flex-direction: column; align-items: flex-start; gap: 6px; }
+.setting-info     { flex: 1; min-width: 0; }
+.setting-label    { font-weight: 600; font-size: 14px; cursor: pointer; }
+.setting-desc     { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+/* ── Toggle switch ─────────────────────────────────────────────────────────── */
+.toggle { display: flex; align-items: center; flex-shrink: 0; cursor: pointer; }
+.toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  width: 42px;
+  height: 24px;
+  background: var(--border);
+  border-radius: 12px;
+  position: relative;
+  transition: background .2s;
+}
+.toggle input:checked + .toggle-track { background: var(--accent); }
+.toggle-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: left .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.toggle input:checked + .toggle-track .toggle-thumb { left: 21px; }
+.toggle input:focus-visible + .toggle-track {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Text input ────────────────────────────────────────────────────────────── */
+.text-input {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text);
+  transition: border-color .15s, outline .15s;
+}
+.text-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  border-color: var(--accent);
+}
+
+/* ── Course filters ────────────────────────────────────────────────────────── */
+.course-filters { display: flex; flex-direction: column; gap: 6px; }
+.placeholder-text { font-size: 13px; color: var(--text-sub); }
+.course-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.course-filter-row:hover { background: var(--bg-hover); }
+.course-filter-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+.course-filter-name { font-size: 13px; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Stats grid ────────────────────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+.stat-value { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+.stat-label { font-size: 11px; color: var(--text-sub); text-align: center; }
+
+/* ── Buttons ───────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+.btn:active { transform: scale(.97); }
+.btn-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger-bord);
+}
+.btn-danger:hover { background: #fee2e2; }
+[data-theme="dark"] .btn-danger:hover { background: #7f1d1d; }
+
+/* ── Footer ────────────────────────────────────────────────────────────────── */
+.page-footer {
+  padding: 16px 36px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-sub);
+  text-align: center;
+}
+.page-footer a { color: var(--accent); text-decoration: none; }
+.page-footer a:hover { text-decoration: underline; }
+.save-status { color: var(--accent); font-weight: 600; }
