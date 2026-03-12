@@ -59,6 +59,8 @@ const coursesBadge    = document.getElementById('coursesBadge');
 const courseList      = document.getElementById('courseList');
 const darkToggle      = document.getElementById('darkModeToggle');
 const optionsBtn      = document.getElementById('optionsBtn');
+const nextSyncRow     = document.getElementById('nextSyncRow');
+const nextSyncTimeEl  = document.getElementById('nextSyncTime');
 
 // â”€â”€â”€ Runtime state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -66,6 +68,39 @@ let currentState = 'checking';  // checking | unauthenticated | ready | empty | 
 let syncTimeout  = null;
 let toastTimer   = null;
 let wasFirstRun  = false;
+let countdownInterval = null;
+
+// ─── Next-sync countdown ───────────────────────────────────────────────────────────
+
+const ALARM_NAME = 'classroom-tasks-sync';
+
+function stopNextSyncCountdown() {
+  clearInterval(countdownInterval);
+  countdownInterval = null;
+  nextSyncRow.hidden = true;
+}
+
+function startNextSyncCountdown() {
+  stopNextSyncCountdown();
+  chrome.alarms.get(ALARM_NAME, (alarm) => {
+    if (!alarm) return;
+    nextSyncRow.hidden = false;
+    function tick() {
+      const ms = alarm.scheduledTime - Date.now();
+      if (ms <= 0) {
+        nextSyncTimeEl.textContent = 'soon…';
+        return;
+      }
+      const totalSecs = Math.floor(ms / 1000);
+      const mins = Math.floor(totalSecs / 60);
+      const secs = totalSecs % 60;
+      nextSyncTimeEl.textContent =
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+    tick();
+    countdownInterval = setInterval(tick, 1000);
+  });
+}
 
 // â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -229,6 +264,7 @@ function renderCourses(courses, enabledCourses) {
 // â”€â”€â”€ Sync â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function doSync() {
+  stopNextSyncCountdown();
   const returnState = currentState;  // remember where to return after sync
   setUIState('syncing');
   errorMsgEl.hidden = true;
@@ -274,6 +310,7 @@ function doSync() {
 
       setUIState(hasCourses ? 'ready' : 'empty');
       if (hasCourses) renderCourses(settings.cachedCourses, settings.enabledCourses);
+      if (settings.autoSync) startNextSyncCountdown();
 
       if (response.result.errors?.length) {
         errorMsgEl.textContent = friendlyError(response.result.errors[0]);
@@ -335,8 +372,10 @@ async function init() {
 
   if (!authed) {
     setUIState('unauthenticated');
+    stopNextSyncCountdown();
   } else {
     setUIState(settings.cachedCourses?.length > 0 ? 'ready' : 'empty');
+    if (settings.autoSync) startNextSyncCountdown();
   }
 }
 

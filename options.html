@@ -32,13 +32,25 @@
 
         <div class="setting-row">
           <div class="setting-info">
-            <label class="setting-label" for="autoSyncToggle">Auto-sync every 30 minutes</label>
+            <label class="setting-label" for="autoSyncToggle">Auto-sync</label>
             <p class="setting-desc">Check for new announcements in the background</p>
           </div>
           <label class="toggle" aria-label="Enable auto-sync">
             <input type="checkbox" id="autoSyncToggle">
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
           </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label class="setting-label" for="syncInterval">Sync interval</label>
+            <p class="setting-desc">How often to check for new announcements</p>
+          </div>
+          <select id="syncInterval" class="text-input" style="width:auto">
+            <option value="900000">15 min</option>
+            <option value="1800000" selected>30 min</option>
+            <option value="3600000">1 hour</option>
+          </select>
         </div>
 
         <div class="setting-row">

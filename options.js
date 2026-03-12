@@ -4,10 +4,11 @@
 import { getSettings, updateSettings } from './utils/storage.js';
 
 // ─── DOM refs ─────────────────────────────────────────────────────────────────
-const page            = document.getElementById('page');
-const autoSyncToggle  = document.getElementById('autoSyncToggle');
-const darkModeToggle  = document.getElementById('darkModeToggle');
-const taskListInput   = document.getElementById('taskListName');
+const page              = document.getElementById('page');
+const autoSyncToggle    = document.getElementById('autoSyncToggle');
+const syncIntervalSelect = document.getElementById('syncInterval');
+const darkModeToggle    = document.getElementById('darkModeToggle');
+const taskListInput     = document.getElementById('taskListName');
 const courseFiltersEl = document.getElementById('courseFilters');
 
 const statLastSync    = document.getElementById('statLastSync');
@@ -79,10 +80,11 @@ async function saveCourseFilters() {
 async function saveGeneral() {
   const dark         = darkModeToggle.checked;
   const autoSync     = autoSyncToggle.checked;
+  const syncInterval = parseInt(syncIntervalSelect.value, 10) || 1800000;
   const taskListName = taskListInput.value.trim() || 'Classroom Tasks';
 
   applyTheme(dark);
-  await updateSettings({ darkMode: dark, autoSync, taskListName });
+  await updateSettings({ darkMode: dark, autoSync, syncInterval, taskListName });
 
   // Tell background to re-schedule or cancel its alarm
   chrome.runtime.sendMessage({ action: 'updateAlarm' });
@@ -95,9 +97,10 @@ async function init() {
   const s = await getSettings();
 
   applyTheme(s.darkMode);
-  autoSyncToggle.checked = s.autoSync;
-  darkModeToggle.checked = s.darkMode;
-  taskListInput.value    = s.taskListName || 'Classroom Tasks';
+  autoSyncToggle.checked        = s.autoSync;
+  syncIntervalSelect.value      = String(s.syncInterval || 1800000);
+  darkModeToggle.checked        = s.darkMode;
+  taskListInput.value           = s.taskListName || 'Classroom Tasks';
 
   // Stats
   statLastSync.textContent    = s.lastSyncTime    ? new Date(s.lastSyncTime).toLocaleString() : '—';
@@ -117,6 +120,7 @@ async function init() {
 // ─── Events ───────────────────────────────────────────────────────────────────
 
 autoSyncToggle.addEventListener('change', saveGeneral);
+syncIntervalSelect.addEventListener('change', saveGeneral);
 darkModeToggle.addEventListener('change', saveGeneral);
 taskListInput.addEventListener('change', saveGeneral);
 

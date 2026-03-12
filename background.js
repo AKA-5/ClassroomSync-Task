@@ -21,11 +21,12 @@ chrome.runtime.onStartup.addListener(() => {
 });
 
 async function scheduleAlarm() {
-  const { autoSync } = await getSettings();
+  const { autoSync, syncInterval } = await getSettings();
   await chrome.alarms.clear(ALARM_NAME);
   if (autoSync) {
-    chrome.alarms.create(ALARM_NAME, { periodInMinutes: 30 });
-    console.log('[ClassroomSync] Background alarm set (30 min)');
+    const periodInMinutes = (syncInterval || 1800000) / 60000;
+    chrome.alarms.create(ALARM_NAME, { periodInMinutes });
+    console.log(`[ClassroomSync] Background alarm set (${periodInMinutes} min)`);
   }
 }
 

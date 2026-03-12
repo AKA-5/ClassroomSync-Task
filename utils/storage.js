@@ -7,6 +7,7 @@
 
 export const DEFAULTS = {
   autoSync:       true,
+  syncInterval:   1800000,  // ms — 30 min default
   darkMode:       false,
   taskListName:   'Classroom Tasks',
   enabledCourses: null,   // null = all courses enabled
