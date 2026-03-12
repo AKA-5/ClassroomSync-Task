@@ -83,6 +83,7 @@ function relativeTime(ts) {
 
 function applyTheme(dark) {
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.body.classList.toggle('dark-mode', !!dark);
   const label = dark ? 'Switch to light mode' : 'Switch to dark mode';
   darkToggle.setAttribute('aria-label', label);
   darkToggle.title = label;
@@ -263,7 +264,7 @@ function doSync() {
       if (wasFirstRun) {
         await markFirstRunDone();
         wasFirstRun = false;
-        showToast('\u2705 Google Account connected! Ready to sync');
+        showToast('Google Account connected. Ready to sync.');
       }
 
       lastSyncEl.textContent  = 'just now';

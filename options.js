@@ -31,7 +31,7 @@ function applyTheme(dark) {
 
 let saveTimer;
 function flashSaved() {
-  saveStatusEl.textContent = 'Saved ✓';
+  saveStatusEl.textContent = 'Saved';
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => { saveStatusEl.textContent = ''; }, 2000);
 }

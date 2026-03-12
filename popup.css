@@ -38,6 +38,14 @@
   --shadow:      0 1px 8px rgba(0,0,0,.5);
 }
 
+/* -- dark-mode class - mirrors [data-theme="dark"] for JS toggle compatibility -- */
+body.dark-mode {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+body.dark-mode .sync-btn { background: var(--bg-card); }
+body.dark-mode .stats    { color: var(--text-sub); }
+
 /* â”€â”€ Theme icon visibility (CSS-driven, no JS textContent) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .icon-sun                   { display: none; }
 [data-theme="dark"] .icon-moon { display: none; }
@@ -336,7 +344,7 @@ body {
   border-radius: var(--radius);
   padding: 11px 13px;
 }
-.auth-prompt__icon { font-size: 20px; flex-shrink: 0; line-height: 1; }
+.auth-prompt__icon { flex-shrink: 0; display: flex; align-items: center; color: var(--accent); }
 .auth-prompt__text { font-size: 13px; font-weight: 500; line-height: 1.45; }
 
 /* â”€â”€ Empty state (no courses found) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -348,7 +356,7 @@ body {
   padding: 18px 12px 10px;
   text-align: center;
 }
-.empty-state__icon { font-size: 30px; line-height: 1; margin-bottom: 2px; }
+.empty-state__icon { display: flex; justify-content: center; margin-bottom: 2px; color: var(--text-sub); }
 .empty-state__text { font-size: 13px; color: var(--text-sub); }
 .empty-state__link {
   font-size: 12px;

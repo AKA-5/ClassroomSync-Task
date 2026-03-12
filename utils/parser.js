@@ -10,6 +10,18 @@ const TASK_KEYWORDS_RE = /\b(quiz|test|exam|assignment|homework|hw|project|essay
 // e.g. "Submit by Friday", "Reading for 3/25", "ends on March 20"
 const STRONG_DATE_INDICATORS_RE = /\b(submit\s+by|turn\s+in\s+by|by\s+(?:tomorrow|today|tonight|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next|this|\d)|due\s*:|ends?\s+(?:on\s+)?(?:\d{1,2}\/|\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)|today|tomorrow)|for\s+\d{1,2}\/\d{1,2})\b/i;
 
+// Case-insensitive keyword regex with global flag (safe for exec()/match() loops)
+export const KEYWORDS = /(quiz|assignment|homework|reading|due|deadline|submit|turn\s+in|exam|test|midterm|final)\b/gi;
+
+// Date pattern matchers — all case-insensitive with global flag
+export const DATE_PATTERNS = [
+  /\bdue\s+(\w+)/gi,               // "due Friday", "Due tomorrow"
+  /\bdeadline[:\s]+(\w+)/gi,       // "deadline: Monday", "Deadline Monday"
+  /\b(\d{1,2})[\/\-](\d{1,2})/gi, // "3/15", "15-3"
+  /\btomorrow\b/gi,
+  /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/gi,
+];
+
 /**
  * Returns true if the announcement text contains task-related keywords OR
  * strong date-action phrases (e.g. "submit by Friday", "ends 04/20").
@@ -54,6 +66,20 @@ function nextDayOfWeek(dayIndex, forceNextWeek = false) {
   const daysAhead = (diff <= 0 || forceNextWeek) ? diff + 7 : diff;
   const result = new Date(today);
   result.setDate(today.getDate() + daysAhead);
+  return endOfDay(result);
+}
+
+/**
+ * Returns the next occurrence of a weekday as a Date (set to end-of-day).
+ * @param {Date} from - Reference date to calculate from
+ * @param {number} dayIndex - 0=Monday … 6=Sunday (matches days[] array convention)
+ */
+function nextWeekday(from, dayIndex) {
+  const jsDayIndex = (dayIndex + 1) % 7; // convert to JS 0=Sunday convention
+  const diff = jsDayIndex - from.getDay();
+  const daysAhead = diff <= 0 ? diff + 7 : diff;
+  const result = new Date(from);
+  result.setDate(from.getDate() + daysAhead);
   return endOfDay(result);
 }
 
@@ -205,6 +231,17 @@ export function extractDueDate(text) {
   if (!results.length || results[0].confidence < 60) return null;
   const best = results[0];
   return isHoliday(best.date) ? null : best.date;
+}
+
+/**
+ * Simplified date parser for common deadline phrases.
+ * Handles: "tomorrow", "today", "due Friday", "Deadline: Monday", "QUIZ fri", "3/20", etc.
+ * Delegates to extractDueDate for a single best-guess result.
+ * @param {string} text
+ * @returns {Date|null}
+ */
+export function parseDate(text) {
+  return extractDueDate(text);
 }
 
 // ─── Priority Detection ───────────────────────────────────────────────────────

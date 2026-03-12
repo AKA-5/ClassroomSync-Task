@@ -8,8 +8,7 @@
   "permissions": [
     "identity",
     "alarms",
-    "storage",
-    "tabs"
+    "storage"
   ],
   "host_permissions": [
     "https://www.googleapis.com/*"
