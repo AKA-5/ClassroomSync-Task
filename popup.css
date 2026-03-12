@@ -35,9 +35,23 @@
   --border:      #2a3148;
   --accent:      #D4714A;
   --accent-dark: #B85E3A;
+  --sage:        #5a87a0;
   --danger-bg:   #2a0f0f;
   --danger-bord: #7f1d1d;
   --shadow:      0 1px 8px rgba(0,0,0,.5);
+}
+
+[data-theme="dark"] .auth-prompt {
+  background: rgba(42, 49, 72, 0.45);
+}
+[data-theme="dark"] .sync-btn {
+  box-shadow: 0 2px 10px rgba(212,113,74,.15);
+}
+[data-theme="dark"] .sync-btn:hover {
+  box-shadow: 0 4px 16px rgba(212,113,74,.22);
+}
+[data-theme="dark"] .progress-fill {
+  background: linear-gradient(90deg, var(--sage), var(--accent));
 }
 
 /* -- dark-mode class - mirrors [data-theme="dark"] for JS toggle compatibility -- */
