@@ -27,7 +27,7 @@
 }
 
 [data-theme="dark"] {
-  --bg:          #1A1410;
+  --bg:          #131009;
   --bg-card:     #251E18;
   --bg-hover:    #332B24;
   --text:        #F2EAE0;
@@ -35,6 +35,8 @@
   --border:      #3A3028;
   --accent:      #D4714A;
   --accent-dark: #B85E3A;
+  --danger-bg:   #450a0a;
+  --danger-bord: #991b1b;
   --shadow:      0 1px 8px rgba(0,0,0,.5);
 }
 
