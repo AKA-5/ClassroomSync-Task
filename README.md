@@ -2,6 +2,8 @@
 
 Automatically converts Google Classroom announcements into Google Tasks with due dates, priorities, and clean titles — no manual entry needed.
 
+Privacy Policy: [Privacy Policy (HTML)](privacy-policy.html)
+
 ## What it does
 
 Each announcement matching a task keyword (quiz, assignment, exam, deadline, etc.) becomes a Google Task with:

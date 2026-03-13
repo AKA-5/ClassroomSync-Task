@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy | ClassroomSync Tasks</title>
+  <style>
+    :root {
+      --bg: #fdf8f4;
+      --card: #ffffff;
+      --text: #1c1410;
+      --muted: #5c4b40;
+      --border: #e4d7ca;
+      --accent: #b5541e;
+      --maxw: 920px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: var(--maxw);
+      margin: 28px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    h1 { margin: 0 0 6px; font-size: 1.9rem; }
+    h2 {
+      margin: 22px 0 8px;
+      font-size: 1.1rem;
+      border-left: 4px solid var(--accent);
+      padding-left: 10px;
+    }
+    p, li { font-size: 0.98rem; }
+    ul { padding-left: 20px; }
+    .meta { color: var(--muted); font-size: 0.92rem; margin-bottom: 14px; }
+    hr { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      text-align: left;
+      padding: 10px;
+      vertical-align: top;
+    }
+    th { background: #f7efe7; font-weight: 600; }
+    a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    a:hover { text-decoration: underline; }
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      background: #f8f0e8;
+      border: 1px solid #eddccc;
+      border-radius: 5px;
+      padding: 1px 5px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <article class="card">
+      <h1>Privacy Policy</h1>
+      <p class="meta"><strong>ClassroomSync Tasks</strong> — Chrome Extension<br>Last updated: March 12, 2026</p>
+
+      <hr>
+
+      <h2>Summary</h2>
+      <p>ClassroomSync Tasks does not collect, transmit, or share any personal data. All processing occurs locally inside your browser. No external servers are involved.</p>
+
+      <hr>
+
+      <h2>Data Accessed</h2>
+      <p>To function, the extension requests read access to your Google Classroom courses and announcements, and write access to Google Tasks. Specifically:</p>
+      <ul>
+        <li><strong>Google Classroom courses</strong> — course names and IDs are cached locally to populate course filters.</li>
+        <li><strong>Google Classroom announcements</strong> — announcement text is read locally to extract due dates and create task titles. It is never transmitted to any server other than Google's own APIs.</li>
+        <li><strong>Google Tasks</strong> — tasks are created in your chosen task list. No existing tasks are read, modified, or deleted.</li>
+        <li><strong>Google account</strong> — authentication is handled entirely by Google via <code>chrome.identity</code>. The extension never receives or stores your password or full account credentials.</li>
+      </ul>
+
+      <hr>
+
+      <h2>Data Storage</h2>
+      <p>All data is stored locally on your device only:</p>
+      <ul>
+        <li><strong><code>chrome.storage.sync</code></strong> — user preferences (auto-sync toggle, sync interval, dark mode, task list name, course filters, priority keywords). Synced across your signed-in Chrome devices by Google.</li>
+        <li><strong><code>chrome.storage.local</code></strong> — hashes of already-synced announcements (for duplicate prevention) and sync history (last sync time, task count). Entries older than 90 days are automatically pruned.</li>
+      </ul>
+      <p>No data is sent to any server operated by the developer.</p>
+
+      <hr>
+
+      <h2>Permissions</h2>
+      <table>
+        <thead>
+          <tr><th>Permission</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>identity</code></td><td>Google OAuth 2.0 sign-in via <code>chrome.identity</code></td></tr>
+          <tr><td><code>storage</code></td><td>Save settings and sync history locally</td></tr>
+          <tr><td><code>alarms</code></td><td>Schedule background sync at your chosen interval</td></tr>
+          <tr><td><code>https://www.googleapis.com/*</code></td><td>Calls to Google Classroom and Tasks APIs</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>OAuth scopes requested:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Scope</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>classroom.courses.readonly</code></td><td>Read your enrolled courses</td></tr>
+          <tr><td><code>classroom.announcements.readonly</code></td><td>Read announcements from those courses</td></tr>
+          <tr><td><code>tasks</code></td><td>Create tasks in Google Tasks</td></tr>
+        </tbody>
+      </table>
+
+      <hr>
+
+      <h2>Google API Services User Data Policy</h2>
+      <p>ClassroomSync Tasks' use of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>, including the Limited Use requirements. Google user data obtained via these APIs is used solely to provide the core functionality of the extension (converting Classroom announcements into Google Tasks) and is not used for any other purpose, sold, or shared with third parties.</p>
+
+      <hr>
+
+      <h2>Third Parties</h2>
+      <p>This extension does not use analytics, advertising, crash reporting, or any third-party SDK. No data is shared with any party other than Google's own API endpoints.</p>
+
+      <hr>
+
+      <h2>Children's Privacy</h2>
+      <p>This extension is not directed at children under 13. It does not knowingly collect data from children.</p>
+
+      <hr>
+
+      <h2>Changes to This Policy</h2>
+      <p>If this policy changes materially, the "Last updated" date above will be revised. Continued use of the extension after changes constitutes acceptance of the updated policy.</p>
+
+      <hr>
+
+      <h2>Contact</h2>
+      <p>Muhammad Kaleem Akhtar<br>
+      GitHub: <a href="https://github.com/AKA-5" target="_blank" rel="noopener noreferrer">github.com/AKA-5</a></p>
+
+      <p>Source code is fully open source and available for review at <a href="https://github.com/AKA-5/ClassroomSync-Task" target="_blank" rel="noopener noreferrer">github.com/AKA-5/ClassroomSync-Task</a>.</p>
+    </article>
+  </main>
+</body>
+</html>
