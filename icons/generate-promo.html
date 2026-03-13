@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<!--
+  ClassroomSync Tasks — Promo Tile Generator
+  Open in Chrome, click each download button, save the files, then upload to the
+  Chrome Web Store developer dashboard under "Store listing → Promotional images".
+
+  Small promo tile  : 440 × 280 px  (JPEG, no alpha)
+  Marquee promo tile: 1400 × 560 px (JPEG, no alpha)
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generate Promo Tiles</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 32px; background: #1a1a2e; color: #e0e0e0; }
+    h1   { margin-bottom: 8px; font-size: 22px; }
+    p    { font-size: 13px; color: #888; margin-bottom: 32px; }
+    .tiles { display: flex; flex-direction: column; gap: 48px; }
+    .tile  { display: flex; flex-direction: column; gap: 12px; }
+    .tile-label { font-size: 13px; color: #aaa; }
+    canvas { display: block; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.6); max-width: 100%; }
+    button {
+      align-self: flex-start;
+      margin-top: 4px;
+      padding: 8px 20px;
+      cursor: pointer;
+      background: #B5541E;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    button:hover { background: #944217; }
+  </style>
+</head>
+<body>
+  <h1>ClassroomSync Tasks — Promo Tile Generator</h1>
+  <p>Tiles are rendered at full resolution below. Click a button to download the JPEG file ready to upload to the Chrome Web Store.</p>
+  <div class="tiles" id="tiles"></div>
+
+  <script>
+    // ── Brand tokens (matches popup.css + options.css) ──────────────────────
+    const PALETTE = {
+      bg:        '#FDF8F4',   // warm cream
+      bgCard:    '#F5EDE3',   // card background
+      border:    '#DDD0C4',
+      text:      '#1C1410',   // dark brown
+      textSub:   '#5C4B40',   // mid brown
+      accent:    '#B5541E',   // terracotta
+      accentDk:  '#944217',
+      sage:      '#4E6845',   // sage green
+      white:     '#FFFFFF',
+    };
+
+    // ── Shared drawing helpers ───────────────────────────────────────────────
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    /** Draw the book + check badge icon at a given center position and size */
+    function drawIcon(ctx, cx, cy, size) {
+      const s = size;
+      const x = cx - s / 2;
+      const y = cy - s / 2;
+
+      // Icon background
+      const grad = ctx.createLinearGradient(x, y, x + s, y + s);
+      grad.addColorStop(0, '#4f46e5');
+      grad.addColorStop(1, '#7c3aed');
+      ctx.fillStyle = grad;
+      roundRect(ctx, x, y, s, s, s * 0.18);
+      ctx.fill();
+
+      // Book body
+      ctx.fillStyle = PALETTE.white;
+      ctx.fillRect(x + s * 0.22, y + s * 0.20, s * 0.52, s * 0.60);
+
+      // Book spine divider
+      ctx.fillStyle = 'rgba(79,70,229,0.15)';
+      ctx.fillRect(x + s * 0.46, y + s * 0.20, s * 0.02, s * 0.60);
+
+      // Text lines
+      ctx.fillStyle = 'rgba(79,70,229,0.85)';
+      ctx.fillRect(x + s * 0.31, y + s * 0.31, s * 0.14, s * 0.06);
+      ctx.fillRect(x + s * 0.31, y + s * 0.41, s * 0.14, s * 0.05);
+      ctx.fillRect(x + s * 0.31, y + s * 0.50, s * 0.10, s * 0.05);
+
+      // Check badge
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(x + s * 0.70, y + s * 0.70, s * 0.20, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = PALETTE.white;
+      ctx.lineWidth   = s * 0.055;
+      ctx.lineCap     = 'round';
+      ctx.lineJoin    = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.61, y + s * 0.70);
+      ctx.lineTo(x + s * 0.68, y + s * 0.78);
+      ctx.lineTo(x + s * 0.80, y + s * 0.63);
+      ctx.stroke();
+    }
+
+    /** Draw a pill-shaped feature chip */
+    function chip(ctx, x, y, text, accentColor) {
+      const pad = 14;
+      ctx.font = 'bold 15px system-ui, sans-serif';
+      const tw = ctx.measureText(text).width;
+      const w  = tw + pad * 2;
+      const h  = 30;
+      const r  = h / 2;
+
+      ctx.fillStyle = accentColor + '22';
+      roundRect(ctx, x, y, w, h, r);
+      ctx.fill();
+
+      ctx.strokeStyle = accentColor + '66';
+      ctx.lineWidth   = 1;
+      roundRect(ctx, x, y, w, h, r);
+      ctx.stroke();
+
+      ctx.fillStyle  = accentColor;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, x + pad, y + h / 2);
+
+      return w + 10; // returns width consumed (for chaining)
+    }
+
+    // ── SMALL PROMO TILE — 440 × 280 ────────────────────────────────────────
+
+    function drawSmall(canvas) {
+      const W = 440, H = 280;
+      canvas.width  = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      // Background — warm cream
+      ctx.fillStyle = PALETTE.bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // Subtle grain texture overlay
+      ctx.fillStyle = 'rgba(181,84,30,0.04)';
+      for (let i = 0; i < W; i += 4) {
+        for (let j = 0; j < H; j += 4) {
+          if (Math.random() > 0.6) ctx.fillRect(i, j, 2, 2);
+        }
+      }
+
+      // Accent bar — left edge
+      const barGrad = ctx.createLinearGradient(0, 0, 0, H);
+      barGrad.addColorStop(0, PALETTE.accent);
+      barGrad.addColorStop(1, PALETTE.accentDk);
+      ctx.fillStyle = barGrad;
+      ctx.fillRect(0, 0, 5, H);
+
+      // Icon
+      drawIcon(ctx, 72, 110, 88);
+
+      // Title
+      ctx.fillStyle = PALETTE.text;
+      ctx.font = 'bold 22px system-ui, sans-serif';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText('ClassroomSync Tasks', 24, 210);
+
+      // Tagline
+      ctx.fillStyle = PALETTE.textSub;
+      ctx.font = '14px system-ui, sans-serif';
+      ctx.fillText('Classroom announcements → Google Tasks', 24, 232);
+
+      // Feature chips — bottom row
+      const chips = ['Auto-sync', 'Smart dates', 'Priorities', 'No servers'];
+      let cx = 24;
+      const cy = 248;
+      chips.forEach(label => {
+        cx += chip(ctx, cx, cy, label, PALETTE.accent);
+      });
+
+      // Terracotta dot — decorative
+      ctx.fillStyle = PALETTE.sage + '33';
+      ctx.beginPath();
+      ctx.arc(400, 40, 60, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = PALETTE.accent + '22';
+      ctx.beginPath();
+      ctx.arc(390, 50, 35, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // ── MARQUEE PROMO TILE — 1400 × 560 ─────────────────────────────────────
+
+    function drawMarquee(canvas) {
+      const W = 1400, H = 560;
+      canvas.width  = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = PALETTE.bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // Large decorative circles — top right
+      ctx.fillStyle = PALETTE.sage + '18';
+      ctx.beginPath();
+      ctx.arc(1280, -40, 260, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = PALETTE.accent + '12';
+      ctx.beginPath();
+      ctx.arc(1320, 60, 160, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Bottom-left subtle circle
+      ctx.fillStyle = PALETTE.accent + '0D';
+      ctx.beginPath();
+      ctx.arc(80, 560, 200, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Accent bar — left edge
+      const barGrad = ctx.createLinearGradient(0, 0, 0, H);
+      barGrad.addColorStop(0, PALETTE.accent);
+      barGrad.addColorStop(1, PALETTE.accentDk);
+      ctx.fillStyle = barGrad;
+      ctx.fillRect(0, 0, 8, H);
+
+      // ── LEFT: Icon + branding ──────────────────────────────────────────────
+
+      drawIcon(ctx, 190, 200, 200);
+
+      // Extension name
+      ctx.fillStyle = PALETTE.text;
+      ctx.font = 'bold 56px system-ui, sans-serif';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText('ClassroomSync Tasks', 60, 370);
+
+      // Tagline
+      ctx.fillStyle = PALETTE.textSub;
+      ctx.font = '26px system-ui, sans-serif';
+      ctx.fillText('Classroom announcements → Google Tasks', 62, 412);
+
+      // Feature chips — two rows
+      const row1 = ['Background sync', 'Natural language dates', 'Auto-priority'];
+      const row2 = ['Course filters', 'Duplicate prevention', 'Dark mode', 'No servers'];
+
+      let cx = 62;
+      ctx.font = 'bold 17px system-ui, sans-serif';
+      row1.forEach(label => { cx += chip(ctx, cx, 442, label, PALETTE.accent); });
+
+      cx = 62;
+      row2.forEach(label => { cx += chip(ctx, cx, 482, label, PALETTE.sage); });
+
+      // ── RIGHT: Mock task card ──────────────────────────────────────────────
+
+      const cardX = 780;
+      const cardY = 80;
+      const cardW = 560;
+
+      // Card shadow
+      ctx.fillStyle = 'rgba(60,30,10,0.07)';
+      roundRect(ctx, cardX + 6, cardY + 6, cardW, 390, 16);
+      ctx.fill();
+
+      // Card background
+      ctx.fillStyle = PALETTE.bgCard;
+      ctx.strokeStyle = PALETTE.border;
+      ctx.lineWidth = 1.5;
+      roundRect(ctx, cardX, cardY, cardW, 390, 16);
+      ctx.fill();
+      ctx.stroke();
+
+      // Card header bar
+      const headerGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY);
+      headerGrad.addColorStop(0, PALETTE.accent);
+      headerGrad.addColorStop(1, PALETTE.accentDk);
+      ctx.fillStyle = headerGrad;
+      roundRect(ctx, cardX, cardY, cardW, 52, 16);
+      ctx.fill();
+      // Flatten bottom corners of header
+      ctx.fillRect(cardX, cardY + 36, cardW, 16);
+
+      ctx.fillStyle = PALETTE.white;
+      ctx.font = 'bold 17px system-ui, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Google Tasks — created automatically', cardX + 20, cardY + 26);
+
+      // Task rows
+      const tasks = [
+        { title: '[Math 101] Quiz on chapters 3–4',     due: 'Due: Fri, Mar 14', priority: 'Medium', color: '#E8A020' },
+        { title: '[CS 305] Final Exam',                  due: 'Due: Mon, Mar 17', priority: 'High',   color: '#DC3545' },
+        { title: '[English] Essay submission',           due: 'Due: Wed, Mar 19', priority: 'Medium', color: '#E8A020' },
+        { title: '[Biology] Lab report due',             due: 'Due: Thu, Mar 20', priority: 'High',   color: '#DC3545' },
+        { title: '[History] Optional reading chapter 7', due: 'No date',          priority: 'Low',    color: '#4E6845' },
+      ];
+
+      tasks.forEach((task, i) => {
+        const ty = cardY + 68 + i * 62;
+
+        // Row separator
+        if (i > 0) {
+          ctx.strokeStyle = PALETTE.border;
+          ctx.lineWidth   = 1;
+          ctx.beginPath();
+          ctx.moveTo(cardX + 16, ty - 5);
+          ctx.lineTo(cardX + cardW - 16, ty - 5);
+          ctx.stroke();
+        }
+
+        // Checkbox circle
+        ctx.strokeStyle = PALETTE.border;
+        ctx.lineWidth   = 2;
+        ctx.beginPath();
+        ctx.arc(cardX + 30, ty + 18, 9, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Task title
+        ctx.fillStyle = PALETTE.text;
+        ctx.font = 'bold 15px system-ui, sans-serif';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(task.title, cardX + 52, ty + 20);
+
+        // Due date
+        ctx.fillStyle = PALETTE.textSub;
+        ctx.font = '13px system-ui, sans-serif';
+        ctx.fillText(task.due, cardX + 52, ty + 38);
+
+        // Priority badge
+        const badgeText = task.priority;
+        ctx.font = 'bold 11px system-ui, sans-serif';
+        const bw = ctx.measureText(badgeText).width + 14;
+        const bx = cardX + cardW - bw - 20;
+        const by = ty + 8;
+
+        ctx.fillStyle = task.color + '22';
+        roundRect(ctx, bx, by, bw, 20, 10);
+        ctx.fill();
+
+        ctx.fillStyle = task.color;
+        ctx.textBaseline = 'middle';
+        ctx.fillText(badgeText, bx + 7, by + 10);
+      });
+
+      // Announcement → arrow → task label
+      ctx.fillStyle = PALETTE.textSub;
+      ctx.font = 'italic 15px system-ui, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Classroom announcement', cardX + 10, cardY + 500);
+
+      ctx.strokeStyle = PALETTE.accent;
+      ctx.lineWidth   = 2;
+      ctx.beginPath();
+      ctx.moveTo(cardX + 200, cardY + 500);
+      ctx.lineTo(cardX + 240, cardY + 500);
+      ctx.stroke();
+      // Arrowhead
+      ctx.fillStyle = PALETTE.accent;
+      ctx.beginPath();
+      ctx.moveTo(cardX + 240, cardY + 493);
+      ctx.lineTo(cardX + 252, cardY + 500);
+      ctx.lineTo(cardX + 240, cardY + 507);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = PALETTE.sage;
+      ctx.font = 'bold 15px system-ui, sans-serif';
+      ctx.fillText('Google Task with date + priority', cardX + 260, cardY + 500);
+    }
+
+    // ── Render + download buttons ────────────────────────────────────────────
+
+    const TILES = [
+      { label: 'Small promo tile — 440 × 280 px', filename: 'promo-small-440x280.jpg',   draw: drawSmall },
+      { label: 'Marquee promo tile — 1400 × 560 px', filename: 'promo-marquee-1400x560.jpg', draw: drawMarquee },
+    ];
+
+    const container = document.getElementById('tiles');
+
+    TILES.forEach(({ label, filename, draw }) => {
+      const canvas = document.createElement('canvas');
+      draw(canvas);
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'tile';
+
+      const lbl = document.createElement('div');
+      lbl.className   = 'tile-label';
+      lbl.textContent = label;
+
+      const btn = document.createElement('button');
+      btn.textContent = `Download ${filename}`;
+      btn.onclick = () => {
+        // Export as JPEG (no alpha — Chrome Web Store requirement)
+        const a    = document.createElement('a');
+        a.href     = canvas.toDataURL('image/jpeg', 0.97);
+        a.download = filename;
+        a.click();
+      };
+
+      wrapper.append(lbl, canvas, btn);
+      container.appendChild(wrapper);
+    });
+  </script>
+</body>
+</html>
